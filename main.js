@@ -1,4 +1,17 @@
 var http = require('http');
+const mongo = require('mongodb').MongoClient
+
+
+
+/*******  connecting mongodb *******/
+const url = 'mongodb://localhost:27017'
+mongo.connect(url, { useNewUrlParser: true }, (err, client) => {
+  if (err) {
+    console.error(err)
+    return
+  }
+})
+
 
 http.createServer(onRequest).listen(8486);
 
@@ -12,6 +25,7 @@ function onRequest(client_req, client_res) {
   if(hostname == 'localhost' && port == '8486'){
     client_res.setHeader('Content-Type', 'application/json');
     client_res.end(JSON.stringify({ a: 1 }))
+    return
   }
   var options = {
     hostname: hostname,
