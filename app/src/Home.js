@@ -6,10 +6,17 @@ class Home extends Component {
         super(props)
         this.state = {
             categories:[
-                {text:'hello'}
             ],
             category_value: '',
         }
+    }
+    componentWillMount = () => {
+        axios.get('http://localhost:8486/category-list/')
+        .then(response => {
+            this.setState({
+                categories:response.data
+            })
+        })
     }
     addCategory = (e) => {
         this.setState(previousState => ({
@@ -38,7 +45,7 @@ class Home extends Component {
                 <div className="col-3">
                 <div className="list-group">
                     {this.state.categories.map((item, index) => (
-                        <a href="#" className="list-group-item list-group-item-action bg-dark text-white" key={index}>{item.text}</a>
+                        <a href="#" className="list-group-item list-group-item-action bg-dark text-white" key={index}>{item.name}</a>
                     ))}
                     {/* <a href="#" className="list-group-item list-group-item-action bg-warning text-white">+ Add Category</a> */}
                     <div className="col-auto list-group-item list-group-item-action bg-light text-white">

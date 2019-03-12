@@ -18,8 +18,6 @@ function onRequest(client_req, client_res) {
   }
   if(hostname == 'localhost' && port == '8486'){
     handleLocalRequests(client_req, client_res)
-    client_res.setHeader('Content-Type', 'application/json');
-    client_res.end(JSON.stringify({ a: 1 }))
     return
   }
   var options = {
@@ -44,6 +42,30 @@ function onRequest(client_req, client_res) {
 
 // handle local requests
 function handleLocalRequests(client_req, client_res){
+  if(client_req.url.startsWith('/category-list/')){
+    mongo.connect(url_mongo, { useNewUrlParser: true }, (err, client) => {
+      if (err) {
+        console.error(err)
+        return
+      }
+      else{
+        let proxy_db = client.db('proxy')
+        categories_collection = proxy_db.collection('category')
+        categories_collection.find({}).toArray((err, items) => {
+          client_res.setHeader('Content-Type', 'application/json');
+          client_res.setHeader('Access-Control-Allow-Origin', '*');
+          client_res.setHeader('Access-Control-Request-Method', '*');
+          client_res.setHeader('Access-Control-Allow-Methods', 'OPTIONS, GET');
+          client_res.setHeader('Access-Control-Allow-Headers', '*');
+          client_res.end(JSON.stringify(items))
+          return
+        })
+        // categories_collection.insertOne({ name: query['name'] }, (err, result) => {
+
+        // })
+      }
+    })
+  }
   if(client_req.url.startsWith('/category/')){
     var url_parts = url.parse(client_req.url, true);
     var query = url_parts.query;
@@ -58,9 +80,9 @@ function handleLocalRequests(client_req, client_res){
         categories_collection.find({}).toArray((err, items) => {
           console.log(items)
         })
-        // categories_collection.insertOne({ name: query['name'] }, (err, result) => {
+        categories_collection.insertOne({ name: query['name'] }, (err, result) => {
 
-        // })
+        })
       }
     })
   }
