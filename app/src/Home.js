@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import axios from 'axios'
 
 class Home extends Component {
     constructor(props){
@@ -14,6 +15,11 @@ class Home extends Component {
         this.setState(previousState => ({
             categories: [...previousState.categories,{text: this.state.category_value}]
         }))
+        axios.get('http://localhost:8486/category/',{
+            params:{
+                name: this.state.category_value
+            }
+        })
     }
     changeCategoryValue = (e) => {
         console.log(e)

@@ -1,6 +1,9 @@
 import React, { Component } from 'react';
 import './App.css';
 import Home from './Home'
+import axios from 'axios'
+
+axios.defaults.headers.get['Access-Control-Allow-Origin'] = '*'
 
 class App extends Component {
   render() {
