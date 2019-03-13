@@ -42,7 +42,7 @@ function onRequest(client_req, client_res) {
 
 // handle local requests
 function handleLocalRequests(client_req, client_res){
-  if(client_req.url.startsWith('/category-list/')){
+  if(client_req.url.startsWith('/items-list/')){
     mongo.connect(url_mongo, { useNewUrlParser: true }, (err, client) => {
       if (err) {
         console.error(err)
@@ -52,13 +52,19 @@ function handleLocalRequests(client_req, client_res){
         let proxy_db = client.db('proxy')
         categories_collection = proxy_db.collection('category')
         categories_collection.find({}).toArray((err, items) => {
-          client_res.setHeader('Content-Type', 'application/json');
-          client_res.setHeader('Access-Control-Allow-Origin', '*');
-          client_res.setHeader('Access-Control-Request-Method', '*');
-          client_res.setHeader('Access-Control-Allow-Methods', 'OPTIONS, GET');
-          client_res.setHeader('Access-Control-Allow-Headers', '*');
-          client_res.end(JSON.stringify(items))
-          return
+          ips_list = proxy_db.collection('ips')
+          ips_list.find({}).toArray((ips_err, ips_items) => {
+            client_res.setHeader('Content-Type', 'application/json');
+            client_res.setHeader('Access-Control-Allow-Origin', '*');
+            client_res.setHeader('Access-Control-Request-Method', '*');
+            client_res.setHeader('Access-Control-Allow-Methods', 'OPTIONS, GET');
+            client_res.setHeader('Access-Control-Allow-Headers', '*');
+            client_res.end(JSON.stringify({
+              categories: items,
+              ips_list: ips_items,
+            }))
+            return
+          })
         })
         // categories_collection.insertOne({ name: query['name'] }, (err, result) => {
 
@@ -66,7 +72,7 @@ function handleLocalRequests(client_req, client_res){
       }
     })
   }
-  if(client_req.url.startsWith('/category/')){
+  if(client_req.url.startsWith('/add-category/')){
     var url_parts = url.parse(client_req.url, true);
     var query = url_parts.query;
     mongo.connect(url_mongo, { useNewUrlParser: true }, (err, client) => {
@@ -77,12 +83,24 @@ function handleLocalRequests(client_req, client_res){
       else{
         let proxy_db = client.db('proxy')
         categories_collection = proxy_db.collection('category')
-        categories_collection.find({}).toArray((err, items) => {
-          console.log(items)
-        })
-        categories_collection.insertOne({ name: query['name'] }, (err, result) => {
-
-        })
+        categories_collection.insertOne({ name: query['name'] }, (err, result) => {})
+      }
+    })
+  }
+  if(client_req.url.startsWith('/add-ips/')){
+    var url_parts = url.parse(client_req.url, true);
+    var query = url_parts.query;
+    console.log(query)
+    mongo.connect(url_mongo, { useNewUrlParser: true }, (err, client) => {
+      console.log(err)
+      if (err) {
+        console.error(err)
+        return
+      }
+      else{
+        let proxy_db = client.db('proxy')
+        categories_collection = proxy_db.collection('ips')
+        categories_collection.insertOne({ name: query['address'], category: query['name'] }, (err, result) => {console.log(err,result)})
       }
     })
   }

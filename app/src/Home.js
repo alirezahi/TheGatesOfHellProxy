@@ -5,16 +5,18 @@ class Home extends Component {
     constructor(props){
         super(props)
         this.state = {
-            categories:[
-            ],
+            categories:[],
+            ips_list:[],
             category_value: '',
+            selected_category: '',
         }
     }
     componentWillMount = () => {
-        axios.get('http://localhost:8486/category-list/')
+        axios.get('http://localhost:8486/items-list/')
         .then(response => {
             this.setState({
-                categories:response.data
+                categories: response.data.categories,
+                ips_list: response.data.ips_list,
             })
         })
     }
@@ -22,10 +24,27 @@ class Home extends Component {
         this.setState(previousState => ({
             categories: [...previousState.categories,{text: this.state.category_value}]
         }))
-        axios.get('http://localhost:8486/category/',{
+        axios.get('http://localhost:8486/add-category/',{
             params:{
                 name: this.state.category_value
             }
+        })
+    }
+    addHost = (category) => {
+        this.setState(previousState => ({
+            categories: [...previousState.categories,{text: this.state.category_value}]
+        }))
+        axios.get('http://localhost:8486/add-ips/',{
+            params:{
+                address: this.state.host_value,
+                category: category,
+            }
+        })
+    }
+    changeHostValue = (e) => {
+        console.log(e)
+        this.setState({
+            host_value: e.target.value
         })
     }
     changeCategoryValue = (e) => {
@@ -45,7 +64,9 @@ class Home extends Component {
                 <div className="col-3">
                 <div className="list-group">
                     {this.state.categories.map((item, index) => (
-                        <a href="#" className="list-group-item list-group-item-action bg-dark text-white" key={index}>{item.name}</a>
+                        <div href="#" className="list-group-item list-group-item-action bg-dark text-white" key={index} onClick={() => {this.setState({})}}>
+                        {item.name}
+                        </div>
                     ))}
                     {/* <a href="#" className="list-group-item list-group-item-action bg-warning text-white">+ Add Category</a> */}
                     <div className="col-auto list-group-item list-group-item-action bg-light text-white">
@@ -64,38 +85,36 @@ class Home extends Component {
                 </div>
                 </div>
                 <div className="col-9">
-                <div>
-                <table className="table table-striped table-dark rounded">
-                    <thead>
-                    <tr>
-                        <th scope="col">#</th>
-                        <th scope="col">First</th>
-                        <th scope="col">Last</th>
-                        <th scope="col">Handle</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr>
-                        <th scope="row">1</th>
-                        <td>Mark</td>
-                        <td>Otto</td>
-                        <td>@mdo</td>
-                    </tr>
-                    <tr>
-                        <th scope="row">2</th>
-                        <td>Jacob</td>
-                        <td>Thornton</td>
-                        <td>@fat</td>
-                    </tr>
-                    <tr>
-                        <th scope="row">3</th>
-                        <td>Larry</td>
-                        <td>the Bird</td>
-                        <td>@twitter</td>
-                    </tr>
-                    </tbody>
-                </table>
-                </div>
+                    <div>
+                        <table className="table table-striped table-dark rounded">
+                            <thead>
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Address</th>
+                                <th scope="col">Category</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {this.state.ips_list.filter(item=>(item.category === this.state.selected_category)).map((item,index)=> (
+                                <tr>
+                                    <th scope="row">{index+1}</th>
+                                    <td>{item.address}</td>
+                                    <td>{item.category}</td>
+                                </tr>
+                            ))
+                            }
+                            </tbody>
+                        </table>
+                        <div class="form-inline row">
+                            <div class="form-group mb-2 col-sm-1">
+                                <label for="address" class="col-form-label">Hostname:</label>
+                            </div>
+                            <div class="form-group mx-sm-3 mb-2 col-sm-7">
+                                <input onChange={this.changeHostValue} class="form-control" id="address" placeholder="Enter hostname" style={{width:'100%'}}/>
+                            </div>
+                            <button onClick={() => this.addHost('bye')} class="btn btn-primary mb-2 col-sm-3">Add Host</button>
+                        </div>
+                    </div>
                 </div>
         </React.Fragment>
         );
