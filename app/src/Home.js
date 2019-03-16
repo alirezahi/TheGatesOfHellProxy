@@ -30,6 +30,16 @@ class Home extends Component {
             }
         })
     }
+    removeCategory = (e) => {
+        this.setState(previousState => ({
+            categories: previousState.categories.filter(item => item.name != this.state.category_value)
+        }))
+        axios.get('http://localhost:8486/remove-category/',{
+            params:{
+                name: this.state.category_value
+            }
+        })
+    }
     addHost = (category) => {
         this.setState(previousState => ({
             ips_list: [...previousState.ips_list,{name: this.state.host_value, category: category}]
@@ -37,6 +47,17 @@ class Home extends Component {
         axios.get('http://localhost:8486/add-ips/',{
             params:{
                 address: this.state.host_value,
+                category: category,
+            }
+        })
+    }
+    removeIPS = (name, category) => {
+        this.setState(previousState => ({
+            ips_list: previousState.ips_list.filter(item => item.name != name && item.category != category)
+        }))
+        axios.get('http://localhost:8486/remove-ips/',{
+            params:{
+                address: name,
                 category: category,
             }
         })
@@ -100,6 +121,7 @@ class Home extends Component {
                                     <th scope="row">{index+1}</th>
                                     <td>{item.name}</td>
                                     <td>{item.category}</td>
+                                    <td><div class="btn btn-danger" onClick={() => this.removeIPS(item.name, item.category)}>remove</div></td>
                                 </tr>
                             ))
                             }
@@ -113,6 +135,11 @@ class Home extends Component {
                                 <input onChange={this.changeHostValue} className="form-control" id="address" placeholder="Enter hostname" style={{width:'100%'}}/>
                             </div>
                             <button onClick={() => this.addHost(this.state.selected_category)} className="btn btn-primary mb-2 col-sm-3">Add Host</button>
+                            <div class="mx-sm-3">
+                                <div className="btn btn-danger" onClick={this.removeCategory}>
+                                Remove Category
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

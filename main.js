@@ -23,15 +23,13 @@ function onRequest(client_req, client_res) {
         let is_filtered = items.some(item => (
           getDomain(hostname).startsWith(getDomain(item.name))
         ))
-        if(is_filtered){
-          client_res.setHeader('Content-Type', 'application/json');
+        if(!is_filtered){
+          // client_res.setHeader('Content-Type', 'application/json');
           client_res.setHeader('Access-Control-Allow-Origin', '*');
           client_res.setHeader('Access-Control-Request-Method', '*');
           client_res.setHeader('Access-Control-Allow-Methods', 'OPTIONS, GET');
           client_res.setHeader('Access-Control-Allow-Headers', '*');
-          client_res.end(JSON.stringify({
-            response: "It's filtered"
-          }))
+          client_res.end('<div style="width:100%;height:100%;border-radius:10px;text-align:center;color:white;font-size:50px;font-weight:bold;background: #2980B9;background: -webkit-linear-gradient(to top, #FFFFFF, #6DD5FA, #2980B9);background: linear-gradient(to top, #FFFFFF, #6DD5FA, #2980B9);padding:40px;">This Domain is Blocked</div>')
           return
         }else{
           if(client_req.headers.host.includes(':')){
@@ -123,6 +121,36 @@ function handleLocalRequests(client_req, client_res){
         let proxy_db = client.db('proxy')
         categories_collection = proxy_db.collection('ips')
         categories_collection.insertOne({ name: query['address'], category: query['category'] }, (err, result) => {})
+      }
+    })
+  }
+  if(client_req.url.startsWith('/remove-category/')){
+    var url_parts = url.parse(client_req.url, true);
+    var query = url_parts.query;
+    mongo.connect(url_mongo, { useNewUrlParser: true }, (err, client) => {
+      if (err) {
+        console.error(err)
+        return
+      }
+      else{
+        let proxy_db = client.db('proxy')
+        categories_collection = proxy_db.collection('category')
+        categories_collection.remove({ name: query['address'], category: query['category'] }, (err, result) => {})
+      }
+    })
+  }
+  if(client_req.url.startsWith('/remove-ips/')){
+    var url_parts = url.parse(client_req.url, true);
+    var query = url_parts.query;
+    mongo.connect(url_mongo, { useNewUrlParser: true }, (err, client) => {
+      if (err) {
+        console.error(err)
+        return
+      }
+      else{
+        let proxy_db = client.db('proxy')
+        categories_collection = proxy_db.collection('ips')
+        categories_collection.remove({ name: query['address'], category: query['category'] }, (err, result) => {})
       }
     })
   }
