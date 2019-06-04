@@ -9,6 +9,7 @@ class Home extends Component {
             ips_list:[],
             category_value: '',
             selected_category: '',
+            isActive: false,
         }
     }
     componentWillMount = () => {
@@ -18,6 +19,7 @@ class Home extends Component {
                 categories: response.data.categories,
                 ips_list: response.data.ips_list,
             })
+
         })
     }
     addCategory = (e) => {
@@ -53,7 +55,7 @@ class Home extends Component {
     }
     removeIPS = (name, category) => {
         this.setState(previousState => ({
-            ips_list: previousState.ips_list.filter(item => item.name != name && item.category != category)
+            ips_list: previousState.ips_list.filter(item => !(item.name == name && item.category == category))
         }))
         axios.get('http://localhost:8486/remove-ips/',{
             params:{
@@ -62,16 +64,22 @@ class Home extends Component {
             }
         })
     }
+    changeActiveCategory = (e, category) => {
+        axios.get('http://localhost:8486/change-category-activation/', {
+            params: {
+                active: e.target.checked,
+                category: this.state.selected_category,
+            }
+        })
+    }
     changeHostValue = (e) => {
-        console.log(e)
         this.setState({
             host_value: e.target.value
         })
     }
     changeCategoryValue = (e) => {
-        console.log(e)
         this.setState({
-            category_value: e.target.value
+            category_value: e.target.value,
         })
     }
     render() {
@@ -139,6 +147,9 @@ class Home extends Component {
                                 <div className="btn btn-danger" onClick={this.removeCategory}>
                                 Remove Category
                                 </div>
+                            </div>
+                            <div class="mx-sm-3">
+                                <input type="checkbox" onChange={e => this.changeActiveCategory(e)}/> isActive
                             </div>
                         </div>
                     </div>
